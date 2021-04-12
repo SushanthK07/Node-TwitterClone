@@ -384,15 +384,19 @@ app.get("/user/tweets/", authenticateUser, async (request, response) => {
   `;
   const tweetObjectsList = await database.all(getTweetsQuery);
 
+  const tweetIdsList = tweetObjectsList.map((object) => {
+    return object.tweet_id;
+  });
+
   const getLikesQuery = `
     SELECT COUNT(like_id) AS likes FROM like 
-    WHERE user_id=${user_id} GROUP BY tweet_id
+    WHERE tweet_id IN (${tweetIdsList}) GROUP BY tweet_id
     ORDER BY tweet_id;
     `;
   const likesObjectsList = await database.all(getLikesQuery);
   const getRepliesQuery = `
     SELECT COUNT(reply_id) AS replies FROM reply 
-    WHERE user_id = ${user_id} GROUP BY tweet_id
+    WHERE tweet_id IN (${tweetIdsList}) GROUP BY tweet_id
     ORDER BY tweet_id;
     `;
   const repliesObjectsList = await database.all(getRepliesQuery);
